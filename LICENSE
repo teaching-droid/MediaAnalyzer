@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+SCOPE OF THIS LICENSE
+
+This license applies only to the PowerShell scripts (.ps1 files) included in
+this repository. The third-party tools used by MediaAnalyzer (such as FFmpeg,
+FFprobe, MediaInfo, CheckBitrate, NVEncC, QSVEncC, dovi_tool, TAppDecoderAnalyser,
+and ldecod/JM) are separate projects with their own licenses. Please refer to
+each tool's respective project page for their licensing terms.

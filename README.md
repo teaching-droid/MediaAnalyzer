@@ -6,23 +6,24 @@ A PowerShell-based tool for deep analysis of video encoding parameters, bitstrea
 
 Given a video file, MediaAnalyzer:
 
-1. **Probes every encoding parameter** — from container metadata down to raw HEVC bitstream (SPS/PPS/VUI/SEI) using the HM Reference Decoder
-2. **Analyzes frame structure** — GOP patterns, B-frame distribution, keyframe intervals, scene cuts
-3. **Extracts HDR metadata** — Dolby Vision RPU, HDR10 mastering display, MaxCLL/MaxFALL from both container tags and SEI NAL units
-4. **Measures bitrate distribution** — statistical analysis with histograms, VBV detection, peak/sustained rates
-5. **Detects GPU hardware capabilities** — queries NVIDIA and Intel GPUs for supported features, rate control modes, codec limits
-6. **Reconstructs encoder commands** — generates ready-to-use x265, NVEncC, and QSVEncC commands that reproduce the source encoding
-7. **Runs verification encodes** — encodes a test segment with each GPU encoder, then verifies the output against the source for correctness
-8. **Measures quality objectively** — VMAF, PSNR, and SSIM comparison of encoded output vs source
+1. **Probes every encoding parameter** - from container metadata down to raw HEVC bitstream (SPS/PPS/VUI/SEI) using the HM Reference Decoder
+2. **Analyzes frame structure** - GOP patterns, B-frame distribution, keyframe intervals, scene cuts
+3. **Extracts HDR metadata** - Dolby Vision RPU, HDR10 mastering display, MaxCLL/MaxFALL from both container tags and SEI NAL units
+4. **Measures bitrate distribution** - statistical analysis with histograms, VBV detection, peak/sustained rates
+5. **Detects GPU hardware capabilities** - queries NVIDIA and Intel GPUs for supported features, rate control modes, codec limits
+6. **Reconstructs encoder commands** - generates ready-to-use x265, NVEncC, and QSVEncC commands that reproduce the source encoding
+7. **Runs verification encodes** - encodes a test segment with each GPU encoder, then verifies the output against the source for correctness
+8. **Measures quality objectively** - VMAF, PSNR, and SSIM comparison of encoded output vs source
 
 ---
 
 ## Requirements
 
 ### System
-- **Windows 10/11** (PowerShell 5.1+)
+- **Windows 10/11**
+- **PowerShell 7.5.5** (tested version)
 - **NVIDIA GPU** (Turing or newer recommended) for NVEncC features
-- **Intel GPU** (6th gen or newer) for QSVEncC features — integrated (UHD 770, etc.) or discrete (Arc)
+- **Intel GPU** (6th gen or newer) for QSVEncC features - integrated (UHD 770, etc.) or discrete (Arc)
 - Either or both GPUs are optional; the tool adapts to what's available
 
 ### Tools
@@ -32,11 +33,11 @@ All tools go in the `tools\` subfolder (or anywhere on PATH). The analyzer auto-
 | Tool | Required | Version Tested | Purpose | Download |
 |------|----------|----------------|---------|----------|
 | **FFprobe** | Yes (core) | 2026-02-09 gyan.dev | Stream analysis, frame probing, GOP structure | [gyan.dev/ffmpeg](https://www.gyan.dev/ffmpeg/builds/) (included with FFmpeg) |
-| **FFmpeg** | Yes (core) | 2026-02-09 gyan.dev | Segment extraction, scene detection, VMAF/PSNR/SSIM | [gyan.dev/ffmpeg](https://www.gyan.dev/ffmpeg/builds/) — get the **full build** for libvmaf support |
-| **MediaInfo** | Recommended | v26.01 | Container metadata, HDR format detection, encoder identification | [mediaarea.net](https://mediaarea.net/en/MediaInfo/Download/Windows) — CLI version |
+| **FFmpeg** | Yes (core) | 2026-02-09 gyan.dev | Segment extraction, scene detection, VMAF/PSNR/SSIM | [gyan.dev/ffmpeg](https://www.gyan.dev/ffmpeg/builds/) - get the **full build** for libvmaf support |
+| **MediaInfo** | Recommended | v26.01 | Container metadata, HDR format detection, encoder identification | [mediaarea.net](https://mediaarea.net/en/MediaInfo/Download/Windows) - CLI version |
 | **CheckBitrate** | Recommended | v0.06 by rigaya | Per-second bitrate distribution, VBV analysis | [github.com/rigaya/CheckBitrate](https://github.com/rigaya/CheckBitrate) |
-| **TAppDecoderAnalyser** | Recommended | HM v18.0 | HEVC reference decoder — reads raw SPS/PPS/VUI/SEI/QP from bitstream | [vcgit.hhi.fraunhofer.de](https://vcgit.hhi.fraunhofer.de/jvet/HM) — build the `TAppDecoderAnalyser` target |
-| **ldecod** (JM) | For H.264 | JM 19.0 | H.264/AVC reference decoder — QP stats, B-pyramid confirmation, SPS ref count | [iphome.hhi.de/suehring](https://iphome.hhi.de/suehring/tml.htm) or build from JM source |
+| **TAppDecoderAnalyser** | Recommended | HM v18.0 | HEVC reference decoder - reads raw SPS/PPS/VUI/SEI/QP from bitstream | [vcgit.hhi.fraunhofer.de](https://vcgit.hhi.fraunhofer.de/jvet/HM) - build the `TAppDecoderAnalyser` target |
+| **ldecod** (JM) | For H.264 | JM 19.0 | H.264/AVC reference decoder - QP stats, B-pyramid confirmation, SPS ref count | [iphome.hhi.de/suehring](https://iphome.hhi.de/suehring/tml.htm) or build from JM source |
 | **dovi_tool** | For DV content | v2.3.1 | Dolby Vision RPU stripping (required before HM can decode DV streams) | [github.com/quietvoid/dovi_tool](https://github.com/quietvoid/dovi_tool/releases) |
 | **NVEncC64** | For NVIDIA GPU | v9.10 (r3505) | GPU encode verification, feature detection | [github.com/rigaya/NVEnc](https://github.com/rigaya/NVEnc/releases) |
 | **QSVEncC64** | For Intel GPU | v8.04 (r3864) | GPU encode verification, feature detection | [github.com/rigaya/QSVEnc](https://github.com/rigaya/QSVEnc/releases) |
@@ -57,18 +58,18 @@ ffmpeg -filters 2>&1 | findstr libvmaf
 
 ```
 MediaAnalyzer\
-├── Analyze-Media.ps1          # Main entry point — orchestrates the entire pipeline
-├── Compare-Videos.ps1         # Multi-encode comparison — side-by-side quality analysis
+├── Analyze-Media.ps1          # Main entry point - orchestrates the entire pipeline
+├── Compare-Videos.ps1         # Multi-encode comparison - side-by-side quality analysis
 ├── README.md                  # This file
 ├── lib\
 │   ├── Helpers.ps1            # Utility functions (Run-Command, Find-Tool, Write-Field, etc.)
-│   ├── Collectors.ps1         # Data collection — FFprobe, MediaInfo, CheckBitrate, scene cuts
-│   ├── HMAnalyser.ps1         # HM Reference Decoder integration — bitstream-level analysis
-│   ├── JMAnalyser.ps1         # JM Reference Decoder integration — H.264/AVC bitstream analysis
-│   ├── ReportWriter.ps1       # Report formatting — writes all analysis sections to text
-│   ├── Reconstruction.ps1     # Encoder command reconstruction — generates x265/NVEnc/QSVEnc commands
-│   ├── GPUCapabilities.ps1    # GPU feature detection — parses --check-features output
-│   └── Verification.ps1       # Verification encodes — test encode + 6-step validation pipeline
+│   ├── Collectors.ps1         # Data collection - FFprobe, MediaInfo, CheckBitrate, scene cuts
+│   ├── HMAnalyser.ps1         # HM Reference Decoder integration - bitstream-level analysis
+│   ├── JMAnalyser.ps1         # JM Reference Decoder integration - H.264/AVC bitstream analysis
+│   ├── ReportWriter.ps1       # Report formatting - writes all analysis sections to text
+│   ├── Reconstruction.ps1     # Encoder command reconstruction - generates x265/NVEnc/QSVEnc commands
+│   ├── GPUCapabilities.ps1    # GPU feature detection - parses --check-features output
+│   └── Verification.ps1       # Verification encodes - test encode + 6-step validation pipeline
 └── tools\                     # Place all external tools here
     ├── ffmpeg.exe
     ├── ffprobe.exe
@@ -87,54 +88,54 @@ MediaAnalyzer\
 
 ## File Descriptions
 
-### `Analyze-Media.ps1` — Main Script
+### `Analyze-Media.ps1` - Main Script
 The entry point. Parses parameters, discovers tools, orchestrates the 9-step analysis pipeline, runs GPU detection, triggers verification, and writes the final report.
 
-### `Compare-Videos.ps1` — Multi-Encode Comparison
+### `Compare-Videos.ps1` - Multi-Encode Comparison
 Standalone tool for comparing multiple encodes of the same source side-by-side. Runs quality metrics (VMAF/PSNR/SSIM) and bitrate analysis across different encoder configurations to help choose optimal settings.
 
-### `lib\Helpers.ps1` — Utilities
+### `lib\Helpers.ps1` - Utilities
 Core helper functions used throughout:
-- `Run-Command` — Executes external tools with timeout, captures stdout/stderr, shows elapsed time
-- `Find-Tool` — Searches the tools folder and PATH for executables
-- `Write-Field` / `Write-Section` — Consistent report formatting
-- `Format-Bitrate` / `Format-Size` — Human-readable bitrate and file size display
+- `Run-Command` - Executes external tools with timeout, captures stdout/stderr, shows elapsed time
+- `Find-Tool` - Searches the tools folder and PATH for executables
+- `Write-Field` / `Write-Section` - Consistent report formatting
+- `Format-Bitrate` / `Format-Size` - Human-readable bitrate and file size display
 
-### `lib\Collectors.ps1` — Data Collection
+### `lib\Collectors.ps1` - Data Collection
 Gathers raw data from external tools:
-- `Get-ProbeJson` — FFprobe stream/format metadata as JSON
-- `Get-FrameData` — Frame-by-frame analysis with distributed multi-segment sampling
-- `Get-MultiPointFrames` — Alternative 5-point sampling (beginning, 25%, 50%, 75%, end)
-- `Get-EncoderInfo` — Encoder identification from container metadata
-- `Get-MediaInfoData` — Full MediaInfo JSON + text output
-- `Get-CheckBitrateData` — Bitrate-over-time CSV with statistics
-- `Get-SceneCuts` — Scene change detection via FFmpeg
+- `Get-ProbeJson` - FFprobe stream/format metadata as JSON
+- `Get-FrameData` - Frame-by-frame analysis with distributed multi-segment sampling
+- `Get-MultiPointFrames` - Alternative 5-point sampling (beginning, 25%, 50%, 75%, end)
+- `Get-EncoderInfo` - Encoder identification from container metadata
+- `Get-MediaInfoData` - Full MediaInfo JSON + text output
+- `Get-CheckBitrateData` - Bitrate-over-time CSV with statistics
+- `Get-SceneCuts` - Scene change detection via FFmpeg
 
-### `lib\HMAnalyser.ps1` — HM Reference Decoder
+### `lib\HMAnalyser.ps1` - HM Reference Decoder
 The deepest analysis layer. Extracts a raw HEVC stream, strips Dolby Vision RPU if present, and feeds it through the HM Reference Decoder Analyser to get:
-- **SPS** — Sequence parameters (CTU size, bit depth, SAO, AMP, scaling lists, DPB)
-- **PPS** — Picture parameters (QP delta, weighted prediction, tiles, WPP, sign hiding)
-- **VUI** — Color primaries, transfer characteristics, matrix coefficients, frame rate
-- **SEI** — HDR10 mastering display, MaxCLL/MaxFALL, content light level
-- **Slice** — Per-slice parameters, merge candidates, temporal MVP
-- **QP** — Per-frame quantization parameters with I/P/B breakdown
-- **CABAC** — Coding unit statistics (skip mode, merge mode, SAO overhead, MV cost)
+- **SPS** - Sequence parameters (CTU size, bit depth, SAO, AMP, scaling lists, DPB)
+- **PPS** - Picture parameters (QP delta, weighted prediction, tiles, WPP, sign hiding)
+- **VUI** - Color primaries, transfer characteristics, matrix coefficients, frame rate
+- **SEI** - HDR10 mastering display, MaxCLL/MaxFALL, content light level
+- **Slice** - Per-slice parameters, merge candidates, temporal MVP
+- **QP** - Per-frame quantization parameters with I/P/B breakdown
+- **CABAC** - Coding unit statistics (skip mode, merge mode, SAO overhead, MV cost)
 
-### `lib\JMAnalyser.ps1` — JM Reference Decoder (H.264/AVC)
+### `lib\JMAnalyser.ps1` - JM Reference Decoder (H.264/AVC)
 The H.264/AVC counterpart to HMAnalyser. Uses the JM Reference Decoder to extract bitstream-level parameters from AVC content, including SPS/PPS headers, slice parameters, and quantization data.
 
-### `lib\ReportWriter.ps1` — Report Formatting
+### `lib\ReportWriter.ps1` - Report Formatting
 Transforms collected data into the human-readable text report. Handles all sections from container format through HDR metadata to compression quality estimates. Also populates the `$rc` (reconstruction context) hashtable that feeds into command generation.
 
-### `lib\Reconstruction.ps1` — Command Generation
-The "big payoff" — generates encoder commands that reproduce the source encoding:
-- **Bitstream-derived parameters** — confidence-tagged parameter list (HIGH/MED/LOW)
-- **Encoding recommendations** — presets, rate control modes, AQ settings
-- **Raw source commands** — x265, NVEncC, QSVEncC for encoding from uncompressed source
-- **Transcode commands** — commands for re-encoding from this file with HDR/DV passthrough
-- **Dolby Vision workflow** — step-by-step RPU extraction, encoding, injection, muxing
+### `lib\Reconstruction.ps1` - Command Generation
+The "big payoff" - generates encoder commands that reproduce the source encoding:
+- **Bitstream-derived parameters** - confidence-tagged parameter list (HIGH/MED/LOW)
+- **Encoding recommendations** - presets, rate control modes, AQ settings
+- **Raw source commands** - x265, NVEncC, QSVEncC for encoding from uncompressed source
+- **Transcode commands** - commands for re-encoding from this file with HDR/DV passthrough
+- **Dolby Vision workflow** - step-by-step RPU extraction, encoding, injection, muxing
 
-### `lib\GPUCapabilities.ps1` — GPU Detection
+### `lib\GPUCapabilities.ps1` - GPU Detection
 Runs `--check-features` on NVEncC and QSVEncC, parses the output into structured capability data:
 - Supported codecs and profiles per GPU
 - Maximum B-frames, reference frames, lookahead depth
@@ -143,7 +144,7 @@ Runs `--check-features` on NVEncC and QSVEncC, parses the output into structured
 - Decode capabilities and VPP (video processing) features
 - Validates generated commands against actual GPU limits
 
-### `lib\Verification.ps1` — Verification Pipeline
+### `lib\Verification.ps1` - Verification Pipeline
 Encodes a test segment with each available GPU encoder, then runs a 6-step validation:
 
 | Step | What It Checks |
@@ -212,7 +213,7 @@ Encodes a test segment with each available GPU encoder, then runs a 6-step valid
 | `-SkipCheckBitrate` | switch | off | Skip the CheckBitrate analysis step entirely |
 | `-SkipQP` | switch | off | Skip QP analysis via HM Reference Decoder (saves significant time but loses bitstream-level detail) |
 | `-ExportJson` | switch | off | Export collected raw data as a JSON file alongside the text report |
-| `-DebugMode` | switch | off | Show detailed debug output for every analysis step — tool exit codes, data sizes, intermediate values. Useful for troubleshooting |
+| `-DebugMode` | switch | off | Show detailed debug output for every analysis step - tool exit codes, data sizes, intermediate values. Useful for troubleshooting |
 
 ---
 
@@ -239,7 +240,7 @@ The verification pipeline uses these thresholds to evaluate encode quality:
 | **PSNR** | ≥ 40 dB | ≥ 35 dB | < 35 dB |
 | **SSIM** | ≥ 0.95 | ≥ 0.90 | < 0.90 |
 
-VMAF is the most meaningful metric — it models human perceptual quality. A score of 93+ indicates transparent (visually lossless) quality. PSNR and SSIM provide complementary signal-level and structural measures.
+VMAF is the most meaningful metric - it models human perceptual quality. A score of 93+ indicates transparent (visually lossless) quality. PSNR and SSIM provide complementary signal-level and structural measures.
 
 ---
 
@@ -247,8 +248,8 @@ VMAF is the most meaningful metric — it models human perceptual quality. A sco
 
 HDR metadata (MaxCLL, MaxFALL, mastering display primaries/luminance) can come from multiple sources. The analyzer uses this priority order:
 
-1. **HM SEI messages** (bitstream) — Most reliable. Read directly from Content Light Level and Mastering Display Colour Volume SEI NAL units in the HEVC stream. Available even when container metadata is missing.
-2. **MediaInfo** (container) — Fallback. Reads from MKV/MP4 container tags. Only used if HM didn't find the values.
+1. **HM SEI messages** (bitstream) - Most reliable. Read directly from Content Light Level and Mastering Display Colour Volume SEI NAL units in the HEVC stream. Available even when container metadata is missing.
+2. **MediaInfo** (container) - Fallback. Reads from MKV/MP4 container tags. Only used if HM didn't find the values.
 
 The report's "HDR Metadata for Passthrough" section notes where each value came from (SEI vs MediaInfo), so you know the provenance.
 
