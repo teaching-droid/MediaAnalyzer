@@ -1,0 +1,33 @@
+# External tools (users download their own)
+tools/
+
+# Test/sample media files
+*.mkv
+*.mp4
+*.m4v
+*.ts
+*.m2ts
+*.avi
+*.hevc
+*.265
+*.bin
+
+# Analysis outputs
+*.csv
+*.json
+!package.json
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# PowerShell
+*.ps1xml
